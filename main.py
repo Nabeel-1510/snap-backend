@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
@@ -11,10 +12,9 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    try:
-        await init_db()
-    except Exception as e:
-        logger.error(f"DB init failed: {e}")
+    # Run DB init in the background so the server starts accepting requests
+    # immediately. The retry loop in init_db will wait until the DB wakes up.
+    asyncio.create_task(init_db())
     yield
 
 
@@ -45,3 +45,4 @@ async def debug():
     url = settings.database_url
     masked = url[:30] + "..." if len(url) > 30 else url
     return {"database_url_prefix": masked, "async_url_prefix": settings.async_database_url[:40]}
+
