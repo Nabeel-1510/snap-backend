@@ -13,13 +13,11 @@ class Settings(BaseSettings):
     celery_broker_url: str = "redis://localhost:6379/1"
     cors_origins: str = "http://localhost:3000"
 
-    class Config:
-        env_file = ".env"
+    model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "case_sensitive": False, "extra": "ignore"}
 
     @property
     def async_database_url(self) -> str:
         url = self.database_url
-        # Render uses postgres:// (old Heroku-style), SQLAlchemy needs postgresql://
         if url.startswith("postgres://"):
             url = url.replace("postgres://", "postgresql://", 1)
         if url.startswith("postgresql://") and "+asyncpg" not in url:
@@ -29,7 +27,6 @@ class Settings(BaseSettings):
     @property
     def sync_database_url(self) -> str:
         url = self.database_url
-        # Strip any +asyncpg and normalize for sync psycopg2 usage (Alembic)
         if url.startswith("postgres://"):
             url = url.replace("postgres://", "postgresql://", 1)
         url = url.replace("postgresql+asyncpg://", "postgresql://")
