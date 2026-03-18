@@ -23,10 +23,18 @@ services:
           name: snap-search-redis
           type: redis
           property: connectionString
+      - key: OPENAI_API_KEY
+        sync: false   # Set this manually in the Render dashboard
       - key: OPENAI_MODEL
         value: gpt-4o-mini
+      - key: REDDIT_CLIENT_ID
+        sync: false   # Set this manually in the Render dashboard
+      - key: REDDIT_CLIENT_SECRET
+        sync: false   # Set this manually in the Render dashboard
       - key: REDDIT_USER_AGENT
         value: flashclone/1.0
+      - key: YOUTUBE_API_KEY
+        sync: false   # Set this manually in the Render dashboard
       - key: CORS_ORIGINS
         value: https://nableel.vercel.app
 
@@ -53,10 +61,18 @@ services:
           name: snap-search-redis
           type: redis
           property: connectionString
+      - key: OPENAI_API_KEY
+        sync: false   # Set this manually in the Render dashboard
       - key: OPENAI_MODEL
         value: gpt-4o-mini
+      - key: REDDIT_CLIENT_ID
+        sync: false
+      - key: REDDIT_CLIENT_SECRET
+        sync: false
       - key: REDDIT_USER_AGENT
         value: flashclone/1.0
+      - key: YOUTUBE_API_KEY
+        sync: false
 
   - type: pgsql
     name: snap-search-db
@@ -68,4 +84,3 @@ services:
     name: snap-search-redis
     region: oregon
     plan: free
-
