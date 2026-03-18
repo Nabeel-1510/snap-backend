@@ -23,14 +23,40 @@ services:
           name: snap-search-redis
           type: redis
           property: connectionString
-      # Set these manually in the Render dashboard:
-      # OPENAI_API_KEY, REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET, YOUTUBE_API_KEY
       - key: OPENAI_MODEL
         value: gpt-4o-mini
       - key: REDDIT_USER_AGENT
         value: flashclone/1.0
       - key: CORS_ORIGINS
         value: https://nableel.vercel.app
+
+  - type: worker
+    name: snap-search-worker
+    runtime: python
+    region: oregon
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: celery -A workers.celery_app worker --loglevel=info --concurrency=2
+    autoDeploy: true
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: snap-search-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: snap-search-redis
+          type: redis
+          property: connectionString
+      - key: CELERY_BROKER_URL
+        fromService:
+          name: snap-search-redis
+          type: redis
+          property: connectionString
+      - key: OPENAI_MODEL
+        value: gpt-4o-mini
+      - key: REDDIT_USER_AGENT
+        value: flashclone/1.0
 
   - type: pgsql
     name: snap-search-db
