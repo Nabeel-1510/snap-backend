@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: snap-search-api
+    runtime: python
+    region: oregon
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeploy: true
+    envVarsFromFiles:
+      - config.env
+
+  - type: pgsql
+    name: snap-search-db
+    region: oregon
+    databaseName: flashclone
+
+  - type: redis
+    name: snap-search-redis
+    region: oregon
+    plan: free
