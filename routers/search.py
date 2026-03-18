@@ -54,3 +54,15 @@ async def search(req: SearchRequest, db: AsyncSession = Depends(get_db)):
             for p in products
         ]
     )
+
+
+@router.get("/search/{task_id}")
+async def get_search_status(task_id: str):
+    from workers.celery_app import celery_app
+    task = celery_app.AsyncResult(task_id)
+    if task.state == "PENDING":
+        return {"status": "pending"}
+    elif task.state == "SUCCESS":
+        return {"status": "completed", "result": task.result}
+    else:
+        return {"status": "failed", "error": str(task.info)}
