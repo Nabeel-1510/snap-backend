@@ -19,8 +19,20 @@ class Settings(BaseSettings):
     @property
     def async_database_url(self) -> str:
         url = self.database_url
-        if url.startswith("postgresql://"):
+        # Render uses postgres:// (old Heroku-style), SQLAlchemy needs postgresql://
+        if url.startswith("postgres://"):
+            url = url.replace("postgres://", "postgresql://", 1)
+        if url.startswith("postgresql://") and "+asyncpg" not in url:
             url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+        return url
+
+    @property
+    def sync_database_url(self) -> str:
+        url = self.database_url
+        # Strip any +asyncpg and normalize for sync psycopg2 usage (Alembic)
+        if url.startswith("postgres://"):
+            url = url.replace("postgres://", "postgresql://", 1)
+        url = url.replace("postgresql+asyncpg://", "postgresql://")
         return url
 
 
