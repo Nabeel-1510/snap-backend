@@ -9,8 +9,14 @@ from services.youtube import fetch_youtube_reviews
 from services.ai_engine import synthesize_reviews
 from services.scoring import compute_ai_score
 
-sync_db_url = settings.database_url.replace("+asyncpg", "")
-sync_engine = create_engine(sync_db_url)
+_sync_engine = None
+
+
+def _get_engine():
+    global _sync_engine
+    if _sync_engine is None:
+        _sync_engine = create_engine(settings.sync_database_url)
+    return _sync_engine
 
 
 def _run_async(coro):
@@ -51,7 +57,7 @@ def analyze_product_url(self, url: str):
         ai_result.get("longevity_score", 0),
     )
 
-    with Session(sync_engine) as session:
+    with Session(_get_engine()) as session:
         product = Product(
             title=product_data["title"],
             brand=product_data.get("brand", ""),
@@ -104,7 +110,7 @@ def analyze_product_url(self, url: str):
 def refresh_prices(product_id: str):
     from models import Product, ProductPrice
 
-    with Session(sync_engine) as session:
+    with Session(_get_engine()) as session:
         product = session.get(Product, product_id)
         if not product or not product.source_url:
             return {"status": "skipped"}
